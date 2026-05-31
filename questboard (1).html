@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ Quest Board ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+:root {
+  --grass: #7ec850;
+  --grass-dark: #5aab2e;
+  --grass-light: #a8e06a;
+  --sky: #87ceeb;
+  --sky-deep: #4a9fd4;
+  --water: #5bb8f5;
+  --sand: #f5e6a3;
+  --sand-dark: #e8cc6a;
+  --path: #d4a96a;
+  --purple: #c084fc;
+  --purple-dark: #9333ea;
+  --purple-light: #e9d5ff;
+  --pink: #f9a8d4;
+  --pink-dark: #ec4899;
+  --yellow: #fde68a;
+  --yellow-dark: #f59e0b;
+  --red: #fca5a5;
+  --red-dark: #ef4444;
+  --teal: #6ee7b7;
+  --teal-dark: #059669;
+  --white: #fffdf7;
+  --cream: #fef9ee;
+  --card-bg: rgba(255,253,247,0.95);
+  --shadow: 0 4px 0 rgba(0,0,0,0.15);
+  --shadow-lg: 0 6px 0 rgba(0,0,0,0.18);
+  --border: 3px solid rgba(0,0,0,0.12);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --font: 'Nunito', sans-serif;
+  --font-display: 'Fredoka One', cursive;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--sky);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── WORLD BACKGROUND ── */
+.world-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(180deg, #b8e4f9 0%, #87ceeb 35%, #87ceeb 55%, #7ec850 55%, #5aab2e 100%);
+  overflow: hidden;
+}
+.cloud {
+  position: absolute;
+  background: white;
+  border-radius: 50px;
+  opacity: 0.85;
+  animation: float-cloud linear infinite;
+}
+.cloud::before, .cloud::after {
+  content: '';
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+}
+.c1 { width:100px;height:38px;top:8%;left:-120px;animation-duration:28s;animation-delay:0s; }
+.c1::before { width:50px;height:50px;top:-22px;left:12px; }
+.c1::after { width:36px;height:36px;top:-14px;left:44px; }
+.c2 { width:140px;height:48px;top:18%;left:-160px;animation-duration:36s;animation-delay:-12s; }
+.c2::before { width:65px;height:65px;top:-30px;left:18px; }
+.c2::after { width:48px;height:48px;top:-20px;left:65px; }
+.c3 { width:80px;height:30px;top:6%;left:-100px;animation-duration:22s;animation-delay:-6s; }
+.c3::before { width:40px;height:40px;top:-18px;left:10px; }
+.c3::after { width:28px;height:28px;top:-10px;left:36px; }
+@keyframes float-cloud { from{left:-200px} to{left:110%} }
+
+.tree-row {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 110px;
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  pointer-events: none;
+}
+.tree {
+  font-size: 52px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 0 rgba(0,0,0,0.15));
+  animation: tree-sway 3s ease-in-out infinite;
+}
+.tree:nth-child(even) { animation-delay: -1.5s; font-size: 44px; }
+.tree:nth-child(3n) { animation-delay: -0.8s; font-size: 38px; }
+@keyframes tree-sway { 0%,100%{transform:rotate(-1deg)} 50%{transform:rotate(1deg)} }
+
+.star {
+  position: absolute;
+  font-size: 18px;
+  animation: twinkle 2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes twinkle { 0%,100%{opacity:.3;transform:scale(0.8)} 50%{opacity:1;transform:scale(1.1)} }
+
+/* ── LAYOUT ── */
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1rem 1rem 4rem;
+}
+
+/* ── HEADER ── */
+.header {
+  text-align: center;
+  padding: 1.2rem 0 0.5rem;
+  position: relative;
+}
+.header-title {
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  color: white;
+  text-shadow: 0 4px 0 rgba(0,0,0,0.2), 0 0 30px rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+  line-height: 1;
+}
+.header-sub {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  margin-top: 4px;
+  letter-spacing: .5px;
+}
+.party-xp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--yellow);
+  border: 3px solid var(--yellow-dark);
+  border-radius: 30px;
+  padding: 5px 16px;
+  font-weight: 800;
+  font-size: 14px;
+  color: #92400e;
+  margin-top: 8px;
+  box-shadow: var(--shadow);
+}
+
+/* ── NOTIFICATIONS ── */
+.notif-stack {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 280px;
+}
+.notif {
+  background: var(--card-bg);
+  border-radius: var(--radius-sm);
+  padding: 10px 36px 10px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+  animation: notif-in .3s cubic-bezier(.34,1.56,.64,1);
+  border-left: 5px solid var(--purple-dark);
+}
+.notif.urgent { border-left-color: var(--red-dark); background: #fff5f5; }
+.notif.success { border-left-color: var(--teal-dark); background: #f0fdf4; }
+.notif.badge-n { border-left-color: var(--yellow-dark); background: #fffbeb; }
+.notif.warn { border-left-color: var(--yellow-dark); background: #fffbeb; }
+.notif-close {
+  position: absolute; right: 8px; top: 7px;
+  background: none; border: none; cursor: pointer;
+  font-size: 15px; line-height: 1; opacity: .5;
+  font-family: var(--font); font-weight: 900;
+}
+.notif-close:hover { opacity: 1; }
+@keyframes notif-in { from{transform:translateX(40px);opacity:0} to{transform:none;opacity:1} }
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 1rem 0 .75rem;
+  flex-wrap: wrap;
+}
+.tab {
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 30px;
+  border: 3px solid rgba(0,0,0,0.15);
+  background: rgba(255,255,255,0.7);
+  color: #555;
+  cursor: pointer;
+  transition: all .18s;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.12);
+}
+.tab:hover { transform: translateY(-1px); }
+.tab.active {
+  background: var(--purple-dark);
+  color: white;
+  border-color: #7c22c7;
+  box-shadow: 0 4px 0 #7c22c7;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  border: var(--border);
+  box-shadow: var(--shadow-lg);
+  padding: 1.1rem 1.2rem;
+  margin-bottom: 1rem;
+}
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--purple-dark);
+  margin-bottom: .75rem;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* ── WORLD SCENE ── */
+.world-scene {
+  background: linear-gradient(180deg, #c5e8f7 0%, #87ceeb 40%, #a8e06a 40%, #7ec850 70%, #5aab2e 100%);
+  border-radius: var(--radius);
+  border: var(--border);
+  box-shadow: var(--shadow-lg);
+  height: 170px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.scene-path {
+  position: absolute;
+  bottom: 18px;
+  left: 0; right: 0;
+  height: 28px;
+  background: var(--path);
+  border-top: 3px solid var(--sand-dark);
+  border-bottom: 3px solid var(--sand-dark);
+}
+.scene-path::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.18) 20px, rgba(255,255,255,0.18) 22px);
+}
+.scene-castle {
+  position: absolute;
+  right: 18px;
+  bottom: 45px;
+  font-size: 64px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+  animation: castle-glow 3s ease-in-out infinite;
+}
+@keyframes castle-glow { 0%,100%{filter:drop-shadow(0 4px 8px rgba(200,150,255,0.3))} 50%{filter:drop-shadow(0 4px 16px rgba(200,150,255,0.7))} }
+.scene-title {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,0.92);
+  border: 3px solid var(--purple-dark);
+  border-radius: 30px;
+  padding: 5px 18px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--purple-dark);
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+}
+.scene-chars {
+  position: absolute;
+  bottom: 44px;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.scene-char {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  animation: char-bounce 1.8s ease-in-out infinite;
+}
+.scene-char:nth-child(even) { animation-delay: -.9s; }
+.scene-char:nth-child(3n) { animation-delay: -.4s; }
+@keyframes char-bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+.scene-char-emoji { font-size: 28px; line-height: 1; }
+.scene-char-name {
+  font-size: 9px;
+  font-weight: 800;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border-radius: 6px;
+  padding: 1px 4px;
+  white-space: nowrap;
+  max-width: 44px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.scene-xp {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--yellow);
+  border: 3px solid var(--yellow-dark);
+  border-radius: 50%;
+  width: 52px; height: 52px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  box-shadow: var(--shadow);
+}
+.scene-xp-num { font-family: var(--font-display); font-size: 1rem; color: #92400e; line-height:1; }
+.scene-xp-lbl { font-size: 9px; font-weight: 800; color: #b45309; }
+.scene-flowers {
+  position: absolute;
+  bottom: 46px;
+  right: 90px;
+  display: flex;
+  gap: 4px;
+  font-size: 18px;
+}
+
+/* ── MEMBER CARDS ── */
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+.member-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  padding: 14px 10px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform .18s, box-shadow .18s;
+  position: relative;
+  overflow: hidden;
+}
+.member-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  background: var(--member-color, var(--purple-dark));
+}
+.member-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+.avatar-circle {
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  margin: 0 auto 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px;
+  border: 4px solid var(--member-color, var(--purple-dark));
+  background: white;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+  position: relative;
+}
+.member-name-text {
+  font-weight: 800;
+  font-size: 13px;
+  color: #2d2d2d;
+  margin-bottom: 2px;
+}
+.member-class-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--member-color, var(--purple-dark));
+  margin-bottom: 6px;
+}
+.xp-bar-wrap {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--member-color, var(--purple-dark)), #c084fc);
+  border-radius: 10px;
+  transition: width .5s cubic-bezier(.34,1.56,.64,1);
+}
+.member-stats-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  color: #888;
+  margin-bottom: 5px;
+}
+.member-badges-row {
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 16px;
+  margin-top: 4px;
+}
+.view-badges-link {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--purple-dark);
+  cursor: pointer;
+  text-decoration: underline;
+  margin-top: 3px;
+  display: block;
+}
+.lv-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--yellow);
+  border: 2px solid var(--yellow-dark);
+  border-radius: 20px;
+  padding: 1px 7px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #92400e;
+}
+
+/* ── QUESTS ── */
+.quest-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 2px dashed rgba(0,0,0,0.07);
+}
+.quest-item:last-child { border-bottom: none; }
+.quest-check {
+  width: 26px; height: 26px; flex-shrink: 0;
+  border-radius: 8px;
+  border: 3px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .18s;
+  font-size: 14px;
+  font-weight: 900;
+  margin-top: 1px;
+}
+.quest-check:hover { border-color: var(--purple-dark); background: var(--purple-light); }
+.quest-check.done { background: var(--teal-dark); border-color: var(--teal-dark); color: white; }
+.quest-info { flex: 1; min-width: 0; }
+.quest-title-text {
+  font-size: 13px; font-weight: 800; color: #2d2d2d;
+  line-height: 1.3;
+}
+.quest-title-text.done {
+  text-decoration: line-through;
+  color: #aaa;
+}
+.quest-meta {
+  display: flex; gap: 6px; align-items: center;
+  flex-wrap: wrap; margin-top: 4px;
+}
+.quest-tag {
+  font-size: 10px; font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.tag-assignee { background: var(--purple-light); color: var(--purple-dark); }
+.tag-deadline { background: #f1f5f9; color: #475569; }
+.tag-urgent { background: var(--red); color: var(--red-dark); }
+.tag-overdue { background: var(--red-dark); color: white; }
+.tag-xp { background: var(--yellow); color: #92400e; }
+.quest-delete {
+  background: none; border: none; cursor: pointer;
+  font-size: 16px; color: #d1d5db; padding: 2px;
+  transition: color .15s; flex-shrink: 0; margin-top: 2px;
+}
+.quest-delete:hover { color: var(--red-dark); }
+
+/* ── FORMS ── */
+.form-section {
+  background: linear-gradient(135deg, var(--purple-light), #fce7f3);
+  border-radius: var(--radius-sm);
+  border: 2px dashed var(--purple);
+  padding: 12px;
+  margin-top: .75rem;
+}
+.form-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--purple-dark);
+  margin-bottom: 6px;
+  display: block;
+}
+.form-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.form-input {
+  flex: 1; min-width: 120px;
+  font-family: var(--font);
+  font-size: 13px; font-weight: 600;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 2px solid #e5e7eb;
+  background: white;
+  color: #2d2d2d;
+  outline: none;
+  transition: border-color .15s;
+}
+.form-input:focus { border-color: var(--purple-dark); }
+.btn-primary {
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 30px;
+  border: 3px solid var(--purple-dark);
+  background: var(--purple-dark);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #7c22c7;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 0 #7c22c7; }
+.btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #7c22c7; }
+
+/* ── AVATAR BUILDER ── */
+.avatar-grid {
+  display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0;
+}
+.av-opt {
+  font-size: 22px; cursor: pointer;
+  padding: 4px; border-radius: 8px;
+  border: 3px solid transparent;
+  background: white;
+  transition: all .15s;
+}
+.av-opt:hover, .av-opt.sel { border-color: var(--purple-dark); background: var(--purple-light); }
+.color-grid { display: flex; gap: 7px; flex-wrap: wrap; margin: 6px 0 10px; }
+.col-opt {
+  width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+  border: 3px solid transparent; transition: all .15s;
+}
+.col-opt:hover, .col-opt.sel { border-color: rgba(0,0,0,0.4); transform: scale(1.2); }
+
+/* ── LEADERBOARD ── */
+.lb-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0;
+  border-bottom: 2px dashed rgba(0,0,0,0.07);
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-rank { font-size: 22px; width: 32px; text-align: center; flex-shrink: 0; }
+.lb-av {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  border: 3px solid var(--member-color, var(--purple-dark));
+  background: white;
+  flex-shrink: 0;
+}
+.lb-info { flex: 1; min-width: 0; }
+.lb-name { font-size: 13px; font-weight: 800; color: #2d2d2d; }
+.lb-class { font-size: 11px; font-weight: 700; color: #888; }
+.lb-xp { font-family: var(--font-display); font-size: 1.2rem; color: var(--purple-dark); }
+.lb-row.top1 { background: linear-gradient(90deg, #fffbeb, transparent); border-radius: 10px; }
+.lb-row.top2 { background: linear-gradient(90deg, #f8fafc, transparent); border-radius: 10px; }
+.lb-row.top3 { background: linear-gradient(90deg, #fff7ed, transparent); border-radius: 10px; }
+
+/* ── BADGE MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--cream);
+  border-radius: var(--radius);
+  border: var(--border);
+  box-shadow: 0 8px 0 rgba(0,0,0,0.2);
+  padding: 1.25rem;
+  width: 100%; max-width: 340px;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: modal-pop .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes modal-pop { from{transform:scale(.85);opacity:0} to{transform:none;opacity:1} }
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--purple-dark);
+  margin-bottom: 1rem;
+}
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+.badge-item {
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 2px solid transparent;
+}
+.badge-item.earned {
+  background: var(--yellow);
+  border-color: var(--yellow-dark);
+}
+.badge-icon { font-size: 26px; line-height: 1; }
+.badge-name { font-size: 9px; font-weight: 800; color: #888; margin-top: 3px; }
+.badge-item.earned .badge-name { color: #92400e; }
+.badge-item:not(.earned) .badge-icon { filter: grayscale(1); opacity: .35; }
+.btn-secondary {
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 30px;
+  border: 3px solid #d1d5db;
+  background: white;
+  color: #555;
+  cursor: pointer;
+  width: 100%;
+  transition: all .15s;
+}
+.btn-secondary:hover { background: #f9fafb; }
+
+/* ── EMPTY STATE ── */
+.empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #aaa;
+  font-size: 13px;
+  font-weight: 700;
+}
+.empty-emoji { font-size: 40px; margin-bottom: 8px; }
+
+/* ── POKEBALL LOADER (decorative) ── */
+.pokeball-deco {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  font-size: 32px;
+  animation: spin-slow 8s linear infinite;
+  z-index: 0;
+  opacity: .35;
+  pointer-events: none;
+}
+@keyframes spin-slow { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+/* ── RESPONSIVE ── */
+@media(max-width:480px) {
+  .header-title { font-size: 2rem; }
+  .members-grid { grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); }
+}
+</style>
+</head>
+<body>
+
+<div class="world-bg">
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="tree-row" id="tree-row"></div>
+</div>
+
+<div class="notif-stack" id="notif-stack"></div>
+<div class="pokeball-deco">🎮</div>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-title">✨ Quest Board ✨</div>
+    <div class="header-sub">Group Task Adventure Tracker</div>
+    <div class="party-xp-pill">
+      ⭐ Party XP: <span id="total-xp">0</span>
+    </div>
+  </div>
+
+  <!-- SCENE -->
+  <div class="world-scene">
+    <div class="scene-path"></div>
+    <div class="scene-castle">🏰</div>
+    <div class="scene-flowers">🌸🌼🌺</div>
+    <div class="scene-title">🗺 Adventure Map</div>
+    <div class="scene-xp">
+      <span class="scene-xp-num" id="scene-xp-num">0</span>
+      <span class="scene-xp-lbl">Party XP</span>
+    </div>
+    <div class="scene-chars" id="scene-chars"></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('quests')">📜 Quests</button>
+    <button class="tab" onclick="showTab('party')">👾 Party</button>
+    <button class="tab" onclick="showTab('rankings')">🏆 Rankings</button>
+  </div>
+
+  <!-- QUESTS TAB -->
+  <div id="tab-quests">
+    <div class="card">
+      <div class="card-title">📜 Active Quests</div>
+      <div id="quest-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">➕ Add New Quest</div>
+      <div class="form-section">
+        <div class="form-row">
+          <input class="form-input" id="q-title" placeholder="Quest name..." style="min-width:200px">
+          <select class="form-input" id="q-assignee" style="min-width:140px"><option value="">Assign to...</option></select>
+        </div>
+        <div class="form-row">
+          <input type="datetime-local" class="form-input" id="q-deadline" style="min-width:185px">
+          <input class="form-input" id="q-xp" placeholder="XP reward (default 20)" style="min-width:140px">
+        </div>
+        <button class="btn-primary" onclick="addQuest()">⚔ Add Quest!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARTY TAB -->
+  <div id="tab-party" style="display:none">
+    <div class="members-grid" id="members-grid"></div>
+    <div class="card">
+      <div class="card-title">👾 Add Party Member</div>
+      <div class="form-section">
+        <div class="form-row">
+          <input class="form-input" id="m-name" placeholder="Name..." style="min-width:150px">
+          <select class="form-input" id="m-class" style="min-width:150px">
+            <option value="Mage">🧙 Mage</option>
+            <option value="Warrior">⚔️ Warrior</option>
+            <option value="Ranger">🏹 Ranger</option>
+            <option value="Healer">💊 Healer</option>
+            <option value="Rogue">🗡️ Rogue</option>
+            <option value="Bard">🎵 Bard</option>
+            <option value="Paladin">🛡️ Paladin</option>
+            <option value="Necromancer">💀 Necromancer</option>
+          </select>
+        </div>
+        <div class="form-label">Choose avatar:</div>
+        <div class="avatar-grid" id="av-grid"></div>
+        <div class="form-label">Choose color:</div>
+        <div class="color-grid" id="col-grid"></div>
+        <button class="btn-primary" onclick="addMember()">🌟 Join Party!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RANKINGS TAB -->
+  <div id="tab-rankings" style="display:none">
+    <div class="card">
+      <div class="card-title">🏆 Hall of Fame</div>
+      <div id="leaderboard"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BADGE MODAL -->
+<div class="modal-overlay" id="badge-modal" onclick="if(event.target===this)closeBadgeModal()">
+  <div class="modal">
+    <div class="modal-title" id="modal-member-name">Badges</div>
+    <div class="badge-grid" id="modal-badge-grid"></div>
+    <button class="btn-secondary" onclick="closeBadgeModal()">Close ✕</button>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const AVATARS = ['🧙','⚔️','🏹','💊','🗡️','🎵','🛡️','💀','🦹','🧝','🐱','🐸','🐼','🦊','🐨','🦋','🌸','⚡','🔮','🌙'];
+const COLORS = ['#9333ea','#ef4444','#059669','#f59e0b','#3b82f6','#ec4899','#14b8a6','#f97316','#8b5cf6','#06b6d4'];
+const CLASS_ICONS = {Mage:'🧙',Warrior:'⚔️',Ranger:'🏹',Healer:'💊',Rogue:'🗡️',Bard:'🎵',Paladin:'🛡️',Necromancer:'💀'};
+const BADGE_DEFS = [
+  {id:'first',icon:'⚔️',name:'First Blood',tip:'Complete 1 quest',cond:m=>m.done>=1},
+  {id:'trio',icon:'🎯',name:'Hat Trick',tip:'Complete 3 quests',cond:m=>m.done>=3},
+  {id:'five',icon:'🌟',name:'Hero',tip:'Complete 5 quests',cond:m=>m.done>=5},
+  {id:'ten',icon:'💎',name:'Legend',tip:'Complete 10 quests',cond:m=>m.done>=10},
+  {id:'speed',icon:'⚡',name:'Speedster',tip:'Finish before deadline',cond:m=>m.onTime>=1},
+  {id:'punctual',icon:'📅',name:'Punctual',tip:'3 on-time completions',cond:m=>m.onTime>=3},
+  {id:'xp100',icon:'✨',name:'100 XP',tip:'Earn 100 XP',cond:m=>m.xp>=100},
+  {id:'xp300',icon:'🔮',name:'300 XP',tip:'Earn 300 XP',cond:m=>m.xp>=300},
+  {id:'xp500',icon:'👑',name:'Champion',tip:'Earn 500 XP',cond:m=>m.xp>=500},
+  {id:'party',icon:'🎉',name:'Team Player',tip:'Join a party',cond:m=>true},
+  {id:'lvl5',icon:'🌈',name:'Level 5',tip:'Reach level 5',cond:m=>Math.floor(m.xp/50)+1>=5},
+  {id:'lvl10',icon:'🐉',name:'Level 10',tip:'Reach level 10',cond:m=>Math.floor(m.xp/50)+1>=10},
+];
+const TREES = ['🌲','🌳','🌴','🌵','🎄','🍀'];
+
+let members = [], quests = [];
+let selAvatar = '🧙', selColor = '#9333ea';
+let deadlineTimers = {};
+
+// ── STORAGE ──
+function save(){
+  try {
+    localStorage.setItem('qb_members', JSON.stringify(members));
+    localStorage.setItem('qb_quests', JSON.stringify(quests));
+  } catch(e){}
+}
+function load(){
+  try {
+    const m = localStorage.getItem('qb_members');
+    const q = localStorage.getItem('qb_quests');
+    if(m) members = JSON.parse(m);
+    if(q) quests = JSON.parse(q);
+  } catch(e){}
+}
+
+// ── UTILS ──
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function lvl(xp){ return Math.floor(xp/50)+1; }
+function xpPct(xp){ return Math.min(100,((xp%50)/50)*100); }
+
+// ── NOTIFICATIONS ──
+function pushNotif(type, msg){
+  const stack = document.getElementById('notif-stack');
+  const div = document.createElement('div');
+  div.className = 'notif ' + type;
+  div.innerHTML = `<span>${msg}</span><button class="notif-close" onclick="this.parentElement.remove()">✕</button>`;
+  stack.insertBefore(div, stack.firstChild);
+  setTimeout(()=>{ if(div.parentNode) div.remove(); }, 7000);
+}
+
+// ── SCENE ──
+function buildTrees(){
+  const row = document.getElementById('tree-row');
+  row.innerHTML = '';
+  const count = Math.ceil(window.innerWidth / 48) + 2;
+  for(let i=0;i<count;i++){
+    const d = document.createElement('div');
+    d.className = 'tree';
+    d.textContent = TREES[i % TREES.length];
+    row.appendChild(d);
+  }
+}
+function renderScene(){
+  const chars = document.getElementById('scene-chars');
+  chars.innerHTML = '';
+  members.forEach(m=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'scene-char';
+    wrap.innerHTML = `<div class="scene-char-emoji">${m.avatar}</div><div class="scene-char-name">${m.name}</div>`;
+    chars.appendChild(wrap);
+  });
+  const total = members.reduce((a,m)=>a+m.xp,0);
+  document.getElementById('scene-xp-num').textContent = total;
+  document.getElementById('total-xp').textContent = total;
+}
+
+// ── TABS ──
+function showTab(t){
+  ['quests','party','rankings'].forEach(x=>{
+    document.getElementById('tab-'+x).style.display = x===t?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    el.classList.toggle('active', ['quests','party','rankings'][i]===t);
+  });
+  if(t==='party') renderMembers();
+  if(t==='rankings') renderRankings();
+}
+
+// ── MEMBERS ──
+function renderMembers(){
+  const grid = document.getElementById('members-grid');
+  grid.innerHTML = '';
+  if(!members.length){
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-emoji">👾</div>No party members yet!<br>Add one below.</div>';
+    return;
+  }
+  members.forEach(m=>{
+    const earnedBadges = BADGE_DEFS.filter(b=>b.cond(m));
+    const div = document.createElement('div');
+    div.className = 'member-card';
+    div.style.setProperty('--member-color', m.color);
+    div.innerHTML = `
+      <div class="lv-badge">Lv.${lvl(m.xp)}</div>
+      <div class="avatar-circle" style="border-color:${m.color};background:${m.color}18">${m.avatar}</div>
+      <div class="member-name-text">${m.name}</div>
+      <div class="member-class-text">${CLASS_ICONS[m.cls]||'⚔️'} ${m.cls}</div>
+      <div class="xp-bar-wrap"><div class="xp-bar-fill" style="width:${xpPct(m.xp)}%;background:linear-gradient(90deg,${m.color},${m.color}99)"></div></div>
+      <div class="member-stats-row"><span>${m.xp} XP</span><span>${m.done} done</span></div>
+      <div class="member-badges-row">${earnedBadges.slice(0,5).map(b=>`<span title="${b.name}">${b.icon}</span>`).join('')}</div>
+      <span class="view-badges-link" onclick="openBadgeModal('${m.id}')">View all badges (${earnedBadges.length}/${BADGE_DEFS.length})</span>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function addMember(){
+  const name = document.getElementById('m-name').value.trim();
+  const cls = document.getElementById('m-class').value;
+  if(!name) return pushNotif('warn','⚠️ Please enter a name!');
+  const m = { id:uid(), name, cls, avatar:selAvatar, color:selColor, xp:0, done:0, onTime:0 };
+  members.push(m);
+  document.getElementById('m-name').value = '';
+  rebuildAssigneeSelect();
+  renderMembers();
+  renderScene();
+  save();
+  pushNotif('badge-n', `${selAvatar} ${name} joined as ${CLASS_ICONS[cls]||'⚔️'} ${cls}!`);
+}
+
+// ── QUESTS ──
+function renderQuests(){
+  const list = document.getElementById('quest-list');
+  list.innerHTML = '';
+  if(!quests.length){
+    list.innerHTML = '<div class="empty"><div class="empty-emoji">📜</div>No quests yet!<br>Add your first quest below.</div>';
+    return;
+  }
+  const active = quests.filter(q=>!q.done);
+  const done = quests.filter(q=>q.done);
+  const render = (arr) => arr.forEach(q=>{
+    const member = members.find(m=>m.id===q.assignee);
+    const now = Date.now();
+    const dl = q.deadline ? new Date(q.deadline).getTime() : null;
+    const hLeft = dl ? (dl-now)/3600000 : null;
+    let dlTag = '';
+    if(dl){
+      if(now > dl && !q.done) dlTag = `<span class="quest-tag tag-overdue">⚠ Overdue!</span>`;
+      else if(hLeft !== null && hLeft < 24 && !q.done) dlTag = `<span class="quest-tag tag-urgent">🔥 ${Math.ceil(hLeft)}h left</span>`;
+      else dlTag = `<span class="quest-tag tag-deadline">📅 ${new Date(q.deadline).toLocaleDateString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>`;
+    }
+    const row = document.createElement('div');
+    row.className = 'quest-item';
+    row.innerHTML = `
+      <div class="quest-check ${q.done?'done':''}" onclick="toggleQuest('${q.id}')">${q.done?'✓':''}</div>
+      <div class="quest-info">
+        <div class="quest-title-text ${q.done?'done':''}">${q.title}</div>
+        <div class="quest-meta">
+          ${member ? `<span class="quest-tag tag-assignee">${member.avatar} ${member.name}</span>` : '<span class="quest-tag" style="background:#f1f5f9;color:#94a3b8">Unassigned</span>'}
+          ${dlTag}
+          <span class="quest-tag tag-xp">+${q.reward} XP</span>
+        </div>
+      </div>
+      <button class="quest-delete" onclick="deleteQuest('${q.id}')" title="Remove">✕</button>
+    `;
+    list.appendChild(row);
+  });
+  render(active);
+  if(done.length){
+    const sep = document.createElement('div');
+    sep.style.cssText='font-size:11px;font-weight:800;color:#aaa;padding:8px 0 4px;';
+    sep.textContent='✅ Completed';
+    list.appendChild(sep);
+    render(done);
+  }
+}
+
+function addQuest(){
+  const title = document.getElementById('q-title').value.trim();
+  const assignee = document.getElementById('q-assignee').value;
+  const deadline = document.getElementById('q-deadline').value;
+  const reward = parseInt(document.getElementById('q-xp').value) || 20;
+  if(!title) return pushNotif('warn','⚠️ Please enter a quest name!');
+  const q = { id:uid(), title, assignee, deadline, reward, done:false };
+  quests.push(q);
+  document.getElementById('q-title').value = '';
+  document.getElementById('q-xp').value = '';
+  renderQuests();
+  save();
+  scheduleDeadlineNotif(q);
+  const member = members.find(m=>m.id===assignee);
+  const who = member ? member.name : 'the party';
+  if(deadline){
+    const dl = new Date(deadline).getTime();
+    const h = (dl - Date.now())/3600000;
+    if(h < 24 && h > 0) pushNotif('urgent',`🔥 "${title}" for ${who} is due in ${Math.ceil(h)}h!`);
+    else pushNotif('success',`📜 New quest added for ${who}! +${reward} XP on completion.`);
+  } else {
+    pushNotif('success',`📜 Quest added: "${title}" · +${reward} XP`);
+  }
+}
+
+function scheduleDeadlineNotif(q){
+  if(!q.deadline) return;
+  const dl = new Date(q.deadline).getTime();
+  const now = Date.now();
+  if(deadlineTimers[q.id]) clearTimeout(deadlineTimers[q.id]);
+  const warn24 = dl - now - 86400000;
+  if(warn24 > 0){
+    deadlineTimers[q.id+'_24'] = setTimeout(()=>{
+      if(!q.done){
+        const m = members.find(x=>x.id===q.assignee);
+        pushNotif('urgent',`⏰ 24 hours left! "${q.title}"${m?' for '+m.name:''} is due soon!`);
+      }
+    }, warn24);
+  }
+  const warnOverdue = dl - now;
+  if(warnOverdue > 0){
+    deadlineTimers[q.id+'_due'] = setTimeout(()=>{
+      if(!q.done){
+        const m = members.find(x=>x.id===q.assignee);
+        pushNotif('urgent',`🚨 "${q.title}"${m?' for '+m.name:''} is now OVERDUE!`);
+        renderQuests();
+      }
+    }, warnOverdue);
+  }
+}
+
+function toggleQuest(id){
+  const q = quests.find(x=>x.id===id);
+  if(!q) return;
+  const member = members.find(m=>m.id===q.assignee);
+  q.done = !q.done;
+  if(q.done && member){
+    const prevBadgeIds = BADGE_DEFS.filter(b=>b.cond(member)).map(b=>b.id);
+    member.xp += q.reward;
+    member.done++;
+    const dl = q.deadline ? new Date(q.deadline).getTime() : null;
+    if(dl && Date.now() < dl) member.onTime++;
+    const newBadges = BADGE_DEFS.filter(b=>b.cond(member) && !prevBadgeIds.includes(b.id));
+    setTimeout(()=>{
+      pushNotif('success',`🎉 ${member.avatar} ${member.name} completed "${q.title}"! +${q.reward} XP`);
+      newBadges.forEach(b=>pushNotif('badge-n',`🏅 ${member.name} earned the "${b.name}" badge! ${b.icon}`));
+    }, 150);
+    if(deadlineTimers[q.id+'_24']) clearTimeout(deadlineTimers[q.id+'_24']);
+    if(deadlineTimers[q.id+'_due']) clearTimeout(deadlineTimers[q.id+'_due']);
+  } else if(!q.done && member){
+    member.xp = Math.max(0, member.xp - q.reward);
+    member.done = Math.max(0, member.done - 1);
+  }
+  renderQuests();
+  renderMembers();
+  renderScene();
+  save();
+}
+
+function deleteQuest(id){
+  if(deadlineTimers[id+'_24']) clearTimeout(deadlineTimers[id+'_24']);
+  if(deadlineTimers[id+'_due']) clearTimeout(deadlineTimers[id+'_due']);
+  quests = quests.filter(q=>q.id!==id);
+  renderQuests();
+  save();
+}
+
+// ── RANKINGS ──
+function renderRankings(){
+  const lb = document.getElementById('leaderboard');
+  if(!members.length){ lb.innerHTML = '<div class="empty"><div class="empty-emoji">🏆</div>No party members yet!</div>'; return; }
+  const sorted = [...members].sort((a,b)=>b.xp-a.xp);
+  const medals = ['🥇','🥈','🥉'];
+  const topClass = ['top1','top2','top3'];
+  lb.innerHTML = sorted.map((m,i)=>`
+    <div class="lb-row ${topClass[i]||''}">
+      <div class="lb-rank">${medals[i]||'#'+(i+1)}</div>
+      <div class="lb-av" style="border-color:${m.color};background:${m.color}18">${m.avatar}</div>
+      <div class="lb-info">
+        <div class="lb-name">${m.name}</div>
+        <div class="lb-class">${CLASS_ICONS[m.cls]||'⚔️'} ${m.cls} · Lv.${lvl(m.xp)} · ${m.done} quests</div>
+      </div>
+      <div class="lb-xp" style="color:${m.color}">${m.xp} XP</div>
+    </div>
+  `).join('');
+}
+
+// ── BADGE MODAL ──
+function openBadgeModal(mid){
+  const m = members.find(x=>x.id===mid);
+  if(!m) return;
+  document.getElementById('modal-member-name').textContent = m.avatar + ' ' + m.name + '\'s Badges';
+  document.getElementById('modal-badge-grid').innerHTML = BADGE_DEFS.map(b=>{
+    const earned = b.cond(m);
+    return `<div class="badge-item ${earned?'earned':''}" title="${b.tip}">
+      <div class="badge-icon">${b.icon}</div>
+      <div class="badge-name">${b.name}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('badge-modal').classList.add('open');
+}
+function closeBadgeModal(){ document.getElementById('badge-modal').classList.remove('open'); }
+
+// ── ASSIGNEE SELECT ──
+function rebuildAssigneeSelect(){
+  const sel = document.getElementById('q-assignee');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Assign to...</option>' + members.map(m=>`<option value="${m.id}">${m.avatar} ${m.name}</option>`).join('');
+  if(cur) sel.value = cur;
+}
+
+// ── AVATAR / COLOR PICKERS ──
+function buildPickers(){
+  const avGrid = document.getElementById('av-grid');
+  avGrid.innerHTML = '';
+  AVATARS.forEach(a=>{
+    const s = document.createElement('span');
+    s.className = 'av-opt' + (a===selAvatar?' sel':'');
+    s.textContent = a;
+    s.onclick = ()=>{ selAvatar=a; document.querySelectorAll('.av-opt').forEach(x=>x.classList.remove('sel')); s.classList.add('sel'); };
+    avGrid.appendChild(s);
+  });
+  const colGrid = document.getElementById('col-grid');
+  colGrid.innerHTML = '';
+  COLORS.forEach(c=>{
+    const d = document.createElement('div');
+    d.className = 'col-opt' + (c===selColor?' sel':'');
+    d.style.background = c;
+    d.onclick = ()=>{ selColor=c; document.querySelectorAll('.col-opt').forEach(x=>x.classList.remove('sel')); d.classList.add('sel'); };
+    colGrid.appendChild(d);
+  });
+}
+
+// ── PERIODIC CHECK ──
+function startPeriodicCheck(){
+  setInterval(()=>{
+    renderQuests();
+  }, 60000);
+}
+
+// ── PRESET QUESTS ──
+const PRESET_QUESTS = [
+  // Performance Management case study
+  { title: '📋 Performance Management — Case Study', group: 'Performance Management' },
+  // Thesis
+  { title: '📝 Thesis — UREC', group: 'Thesis' },
+  { title: '📝 Thesis — Revised Manuscript', group: 'Thesis' },
+  { title: '📝 Thesis — Grammarian', group: 'Thesis' },
+  { title: '📝 Thesis — Revision (on-going)', group: 'Thesis' },
+  { title: '📝 Thesis — Originality Check', group: 'Thesis' },
+  // AVP on People and the Earth's Ecosystems
+  { title: '🌍 AVP People & Earth — Draft', group: 'AVP' },
+  { title: '🌍 AVP People & Earth — Slides / Template', group: 'AVP' },
+  { title: '🌍 AVP People & Earth — Final Output', group: 'AVP' },
+  // HR Analytics
+  { title: '📊 HR Analytics', group: 'HR Analytics' },
+  // Compensation Administration
+  { title: '💰 Compensation Administration — Activity 3', group: 'Compensation' },
+  { title: '💰 Compensation Administration — Activity 4', group: 'Compensation' },
+  // Labor Law and Legislation
+  { title: '⚖️ Labor Law — Quiz', group: 'Labor Law' },
+  { title: '⚖️ Labor Law — Webinar 1', group: 'Labor Law' },
+  { title: '⚖️ Labor Law — Webinar 2', group: 'Labor Law' },
+  { title: '⚖️ Labor Law — Webinar 3', group: 'Labor Law' },
+  { title: '⚖️ Labor Law — Webinar 4', group: 'Labor Law' },
+  { title: '⚖️ Labor Law — Webinar 5', group: 'Labor Law' },
+  // Organization Development
+  { title: '🏢 Org Development — Letter', group: 'Org Dev' },
+  { title: '🏢 Org Development — Onsite Interview & Survey', group: 'Org Dev' },
+  { title: '🏢 Org Development — Video Editing', group: 'Org Dev' },
+  // Personal Finance
+  { title: '💸 Personal Finance', group: 'Personal Finance' },
+];
+
+function loadPresetQuests(){
+  // Only load if no quests exist yet (fresh start)
+  if(quests.length > 0) return;
+  const deadline = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0,16);
+  PRESET_QUESTS.forEach(pq=>{
+    quests.push({ id:uid(), title:pq.title, assignee:'', deadline, reward:20, done:false });
+  });
+  save();
+}
+
+// ── INIT ──
+function init(){
+  load();
+  loadPresetQuests();
+  buildTrees();
+  buildPickers();
+  renderScene();
+  renderQuests();
+  rebuildAssigneeSelect();
+  startPeriodicCheck();
+
+  // Re-schedule deadline notifs for loaded quests
+  quests.forEach(q=>{ if(!q.done) scheduleDeadlineNotif(q); });
+
+  setTimeout(()=>{
+    pushNotif('badge-n','✨ Welcome to Quest Board! Add your party members to start your adventure!');
+  }, 600);
+
+  window.addEventListener('resize', buildTrees);
+}
+
+init();
+</script>
+</body>
+</html>
